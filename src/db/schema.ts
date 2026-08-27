@@ -532,7 +532,44 @@ export const auditLogs = pgTable('audit_logs', {
   entityType: text('entity_type').notNull(),
   entityId: integer('entity_id'),
   details: text('details'),
+  previousValue: text('previous_value'),
+  newValue: text('new_value'),
+  ipAddress: text('ip_address'),
   timestamp: timestamp('timestamp').defaultNow(),
+});
+
+// ==========================================
+// 17. SUPPORT TICKETS
+// ==========================================
+export const supportTickets = pgTable('support_tickets', {
+  id: serial('id').primaryKey(),
+  ticketNumber: text('ticket_number').notNull(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  category: text('category').notNull().default('ORDER_DISPUTE'),
+  subject: text('subject').notNull(),
+  description: text('description').notNull(),
+  priority: text('priority').notNull().default('MEDIUM'), // LOW, MEDIUM, HIGH, URGENT
+  status: text('status').notNull().default('OPEN'), // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  assignedAdminId: integer('assigned_admin_id').references(() => users.id),
+  resolutionNotes: text('resolution_notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ==========================================
+// 18. PLATFORM SETTINGS
+// ==========================================
+export const platformSettings = pgTable('platform_settings', {
+  id: serial('id').primaryKey(),
+  platformFeePercent: doublePrecision('platform_fee_percent').default(2.0),
+  escrowHoldHours: integer('escrow_hold_hours').default(24),
+  minOrderAmountEtb: doublePrecision('min_order_amount_etb').default(500.0),
+  currency: text('currency').default('ETB'),
+  maintenanceMode: boolean('maintenance_mode').default(false),
+  supportPhone: text('support_phone').default('+251 91 100 2244'),
+  supportEmail: text('support_email').default('support@agrilink.et'),
+  taxRatePercent: doublePrecision('tax_rate_percent').default(0.0),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // ==========================================

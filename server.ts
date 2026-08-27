@@ -100,8 +100,8 @@ const requireRole = (...allowedRoles: string[]) => {
   };
 };
 
-// Auto-seed database on start
-seedDatabase().catch((err) => {
+// Auto-seed database on start with fresh farmer produce data
+seedDatabase(true).catch((err) => {
   console.error('Initial database seed error:', err);
 });
 
@@ -124,8 +124,9 @@ app.get('/api/health', async (req, res) => {
 
 app.post('/api/seed', async (req, res) => {
   try {
-    await seedDatabase();
-    res.json({ success: true, message: 'Database seeded successfully' });
+    const force = req.body?.force !== false;
+    await seedDatabase(force);
+    res.json({ success: true, message: 'Database seeded successfully with authentic Ethiopian farmer crops' });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -457,7 +458,7 @@ app.get('/api/products', async (req, res) => {
       if (p.grade === 'PROCESSING_GRADE' || p.name.toLowerCase().includes('paste') || p.id % 3 === 0) {
         targetBuyerType = 'PROCESSOR';
         targetBuyerNotes = 'Targeted for Food Processors, Canneries & Industrial Mills (High volume bulk delivery).';
-      } else if (p.grade === 'GRADE_1_EXPORT' || p.name.toLowerCase().includes('avocado') || p.name.toLowerCase().includes('coffee') || p.id % 3 === 1) {
+      } else if (p.grade === 'GRADE_1_EXPORT' || p.name.toLowerCase().includes('avocado') || p.name.toLowerCase().includes('teff') || p.id % 3 === 1) {
         targetBuyerType = 'INVESTOR';
         targetBuyerNotes = 'Targeted for Agri-Investors & Exporters (Contract farming & export lots).';
       } else {
@@ -591,7 +592,7 @@ app.get('/api/products/:id', async (req, res) => {
     const targetBuyerType =
       prodList[0].grade === 'PROCESSING_GRADE' || prodList[0].name.toLowerCase().includes('paste') || prodList[0].id % 3 === 0
         ? 'PROCESSOR'
-        : prodList[0].grade === 'GRADE_1_EXPORT' || prodList[0].name.toLowerCase().includes('avocado') || prodList[0].name.toLowerCase().includes('coffee') || prodList[0].id % 3 === 1
+        : prodList[0].grade === 'GRADE_1_EXPORT' || prodList[0].name.toLowerCase().includes('avocado') || prodList[0].name.toLowerCase().includes('teff') || prodList[0].id % 3 === 1
         ? 'INVESTOR'
         : 'BUYER';
 
@@ -1619,7 +1620,7 @@ app.post('/api/reviews', async (req, res) => {
 });
 
 // ==========================================
-// 12. ADMIN METRICS & ANALYTICS
+// 12. ADMIN & OWNER METRICS, ORDERS & PAYMENTS
 // ==========================================
 app.get('/api/admin/overview', async (req, res) => {
   try {
@@ -1628,8 +1629,15 @@ app.get('/api/admin/overview', async (req, res) => {
     const allProducts = await db.select().from(products);
     const allDeliveries = await db.select().from(deliveries);
     const allLoans = await db.select().from(financeApplications);
+    const allPayments = await db.select().from(payments);
 
     const gmv = allOrders.reduce((sum, o) => sum + (o.grandTotalEtb || 0), 0);
+    const totalPaidAmount = allPayments
+      .filter((p) => p.status === 'PAID' || p.status === 'ESCROW_HELD' || p.status === 'RELEASED_TO_FARMER')
+      .reduce((sum, p) => sum + (p.amountEtb || 0), 0);
+    const totalEscrowHeld = allPayments
+      .filter((p) => p.status === 'ESCROW_HELD' || p.status === 'PAID')
+      .reduce((sum, p) => sum + (p.amountEtb || 0), 0);
     const totalTonsInTransit = allDeliveries
       .filter((d) => d.status === 'IN_TRANSIT' || d.status === 'ASSIGNED')
       .length * 4.5;
@@ -1643,6 +1651,8 @@ app.get('/api/admin/overview', async (req, res) => {
       activeListingsCount: allProducts.filter((p) => p.status === 'ACTIVE').length,
       totalOrdersCount: allOrders.length,
       gmvEtb: gmv,
+      totalPaidAmountEtb: totalPaidAmount,
+      totalEscrowHeldEtb: totalEscrowHeld,
       platformRevenueEtb: Math.round(gmv * 0.02),
       activeDeliveriesCount: allDeliveries.filter((d) => d.status === 'IN_TRANSIT').length,
       totalTonsInTransit,
@@ -1650,6 +1660,186 @@ app.get('/api/admin/overview', async (req, res) => {
         .filter((l) => l.status === 'APPROVED' || l.status === 'DISBURSED')
         .reduce((sum, l) => sum + (l.approvedAmountEtb || l.amountRequestedEtb), 0),
     });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Comprehensive Owner / Admin Orders Query with Buyer, Items, Delivery & Payment
+app.get('/api/admin/orders', async (req, res) => {
+  try {
+    const allOrdersList = await db.select().from(orders).orderBy(desc(orders.id));
+    const allUsersList = await db.select().from(users);
+    const allPaymentsList = await db.select().from(payments);
+    const allDeliveriesList = await db.select().from(deliveries);
+    const allDriversList = await db.select().from(drivers);
+    const allOrderItemsList = await db.select().from(orderItems);
+
+    const userMap = new Map(allUsersList.map((u) => [u.id, u]));
+    const driverMap = new Map(allDriversList.map((d) => [d.id, d]));
+
+    const enrichedOrders = allOrdersList.map((ord) => {
+      const buyer = userMap.get(ord.buyerId);
+      const items = allOrderItemsList.filter((it) => it.orderId === ord.id);
+      const pay = allPaymentsList.find((p) => p.orderId === ord.id);
+      const del = allDeliveriesList.find((d) => d.orderId === ord.id);
+      const driver = del?.driverId ? driverMap.get(del.driverId) : null;
+
+      return {
+        ...ord,
+        buyerName: buyer?.fullName || ord.deliveryContactName || 'Customer',
+        buyer: buyer || null,
+        items,
+        payment: pay
+          ? {
+              ...pay,
+              userName: userMap.get(pay.userId)?.fullName || buyer?.fullName,
+              userPhone: userMap.get(pay.userId)?.phone || buyer?.phone,
+            }
+          : null,
+        delivery: del
+          ? {
+              ...del,
+              driverName: driver?.fullName,
+              driverPhone: driver?.phone,
+              vehiclePlate: driver?.vehiclePlateNumber,
+            }
+          : null,
+      };
+    });
+
+    res.json(enrichedOrders);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update Order Payment Status (e.g., Mark as Paid, Release Escrow, Refund)
+app.patch('/api/admin/orders/:id/payment', async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+    const { paymentStatus, provider, transactionRef, notes } = req.body;
+
+    const ord = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+    if (!ord.length) return res.status(404).json({ error: 'Order not found' });
+
+    // Update order payment status
+    const updatedOrder = await db
+      .update(orders)
+      .set({
+        paymentStatus: paymentStatus || ord[0].paymentStatus,
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, orderId))
+      .returning();
+
+    // Check if payment row exists, update or create
+    const existingPay = await db.select().from(payments).where(eq(payments.orderId, orderId)).limit(1);
+    if (existingPay.length) {
+      await db
+        .update(payments)
+        .set({
+          status: paymentStatus || existingPay[0].status,
+          provider: provider || existingPay[0].provider,
+          transactionRef: transactionRef || existingPay[0].transactionRef,
+          paidAt: paymentStatus === 'PAID' || paymentStatus === 'ESCROW_HELD' ? new Date() : existingPay[0].paidAt,
+        })
+        .where(eq(payments.id, existingPay[0].id));
+    } else {
+      await db.insert(payments).values({
+        orderId,
+        userId: ord[0].buyerId,
+        amountEtb: ord[0].grandTotalEtb,
+        currency: 'ETB',
+        provider: provider || 'TELEBIRR',
+        transactionRef: transactionRef || `TX-ADMIN-${Date.now()}`,
+        status: paymentStatus || 'PAID',
+        paidAt: new Date(),
+      });
+    }
+
+    // Add notification to buyer
+    await db.insert(notifications).values({
+      userId: ord[0].buyerId,
+      title: `Payment Updated: ${ord[0].orderNumber}`,
+      message: `Your payment status is now marked as ${paymentStatus}. Notes: ${notes || 'Verified by Admin'}`,
+      type: 'PAYMENT',
+      linkUrl: '/buyer/orders',
+    });
+
+    res.json({ success: true, order: updatedOrder[0] });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update Order Dispatch / Fulfillment
+app.patch('/api/admin/orders/:id/dispatch', async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+    const { orderStatus, driverId, hubId, notes } = req.body;
+
+    const updatedOrder = await db
+      .update(orders)
+      .set({
+        orderStatus: orderStatus || undefined,
+        hubId: hubId ? Number(hubId) : undefined,
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, orderId))
+      .returning();
+
+    if (driverId !== undefined) {
+      const existingDel = await db.select().from(deliveries).where(eq(deliveries.orderId, orderId)).limit(1);
+      if (existingDel.length) {
+        await db
+          .update(deliveries)
+          .set({
+            driverId: driverId ? Number(driverId) : null,
+            status: orderStatus === 'IN_TRANSIT' ? 'IN_TRANSIT' : orderStatus === 'DELIVERED' ? 'DELIVERED' : 'ASSIGNED',
+            updatedAt: new Date(),
+          })
+          .where(eq(deliveries.id, existingDel[0].id));
+      }
+    }
+
+    await db.insert(orderStatusHistory).values({
+      orderId,
+      status: orderStatus || 'DISPATCH_UPDATED',
+      notes: notes || 'Dispatched by Owner/Admin',
+      actorId: currentUserId,
+    });
+
+    res.json({ success: true, order: updatedOrder[0] });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Full Payment & Escrow Transactions Ledger
+app.get('/api/admin/payments', async (req, res) => {
+  try {
+    const allPay = await db.select().from(payments).orderBy(desc(payments.id));
+    const allOrdersList = await db.select().from(orders);
+    const allUsersList = await db.select().from(users);
+
+    const orderMap = new Map(allOrdersList.map((o) => [o.id, o]));
+    const userMap = new Map(allUsersList.map((u) => [u.id, u]));
+
+    const enriched = allPay.map((p) => {
+      const ord = orderMap.get(p.orderId);
+      const usr = userMap.get(p.userId);
+      return {
+        ...p,
+        orderNumber: ord?.orderNumber || `ORD-${p.orderId}`,
+        deliveryAddress: ord?.deliveryAddress || 'Addis Ababa',
+        userName: usr?.fullName || ord?.deliveryContactName || 'Customer',
+        userPhone: usr?.phone || ord?.deliveryContactPhone || '',
+        organizationName: usr?.organizationName || '',
+      };
+    });
+
+    res.json(enriched);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -1684,8 +1874,8 @@ app.post('/api/ussd', async (req, res) => {
         // Price check
         if (parts.length === 1) {
           response = isAmharic
-            ? `CON የሰብል አይነት ይምረጡ:\n1. ሮማ ቲማቲም (አዳማ)\n2. ቀይ ሽንኩርት (ሞጆ)\n3. ማኛ ጤፍ (ደብረ ዘይት)\n4. ሃስ አቮካዶ (ወንጂ)\n5. ይርጋጨፌ ቡና (ሲዳማ)`
-            : `CON Select Crop for Live Spot Price:\n1. Roma Tomatoes (Adama Hub)\n2. Red Onions (Mojo Hub)\n3. Teff Magna (Debre Zeit Hub)\n4. Export Hass Avocados (Wonji)\n5. Yirgacheffe Specialty Coffee`;
+            ? `CON የሰብል አይነት ይምረጡ:\n1. ሮማ ቲማቲም (አዳማ)\n2. ቀይ ሽንኩርት (ሞጆ)\n3. ማኛ ጤፍ (ደብረ ዘይት)\n4. ሃስ አቮካዶ (ወንጂ)\n5. የሻሸመኔ ድንችና ነጭ ሽንኩርት`
+            : `CON Select Crop for Live Spot Price:\n1. Roma Tomatoes (Adama Hub)\n2. Red Onions (Mojo Hub)\n3. Teff Magna (Debre Zeit Hub)\n4. Export Hass Avocados (Wonji)\n5. Fresh Highland Potatoes & Garlic`;
         } else {
           const cropChoice = parts[1];
           const cropPrices: Record<string, { en: string; am: string }> = {
@@ -1693,7 +1883,7 @@ app.post('/api/ussd', async (req, res) => {
             '2': { en: 'Red Onions: ETB 6,400/Quintal (Stable cold-chain supply)', am: 'ቀይ ሽንኩርት: 6,400 ብር በኩንታል (በቂ ክምችት)' },
             '3': { en: 'Teff Magna Grade 1: ETB 12,200/Quintal (Export grade certified)', am: 'ማኛ ጤፍ አንደኛ ደረጃ: 12,200 ብር በኩንታል' },
             '4': { en: 'Export Hass Avocado: ETB 75/KG (Brix 12% verified)', am: 'ሃስ አቮካዶ: 75 ብር በኪሎ (ኤክስፖርት ደረጃ)' },
-            '5': { en: 'Yirgacheffe Coffee (Grade 1): ETB 380/KG (Specialty lot)', am: 'ይርጋጨፌ ስፔሻሊቲ ቡና: 380 ብር በኪሎ' },
+            '5': { en: 'Highland Potatoes: ETB 48/KG (Chencha garlic & fresh tubers)', am: 'የሻሸመኔ ድንች: 48 ብር በኪሎ (የቼንቻ ነጭ ሽንኩርትና ድንች)' },
           };
           const p = cropPrices[cropChoice] || cropPrices['1'];
           response = isAmharic

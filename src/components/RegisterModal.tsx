@@ -332,7 +332,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
                   <div>
                     <h4 className="text-xs font-black text-zinc-900">Agri-Investors & Exporters</h4>
                     <p className="text-[10px] text-zinc-500 leading-tight mt-0.5">
-                      Export grade avocados, specialty coffee & outgrower schemes.
+                      Export grade avocados, fresh teff grain, pulses & outgrower schemes.
                     </p>
                   </div>
                 </div>

@@ -15,6 +15,9 @@ import { Footer } from './components/Footer.tsx';
 import { NotificationsModal } from './components/NotificationsModal.tsx';
 import { USSDModal } from './components/USSDModal.tsx';
 import { RegisterModal } from './components/RegisterModal.tsx';
+import { BrandModal } from './components/BrandModal.tsx';
+import { AuthModal } from './components/AuthModal.tsx';
+import { CallCenterModal } from './components/CallCenterModal.tsx';
 import { User, Product, ProductCategory, CartItem, Notification } from './types/index.ts';
 
 export default function App() {
@@ -38,6 +41,9 @@ export default function App() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [ussdModalOpen, setUssdModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [brandModalOpen, setBrandModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [callCenterModalOpen, setCallCenterModalOpen] = useState(false);
 
   // Initial Data Fetching
   const fetchAuthAndPlatformData = async () => {
@@ -51,7 +57,15 @@ export default function App() {
       ]);
 
       if (usrRes.ok) setAllUsers(await usrRes.json());
-      if (curRes.ok) setCurrentUser(await curRes.json());
+      
+      // If user previously logged in, restore session; otherwise default to open Guest Mode
+      const isAuthSaved = localStorage.getItem('agrilink_authenticated') === 'true';
+      if (isAuthSaved && curRes.ok) {
+        setCurrentUser(await curRes.json());
+      } else {
+        setCurrentUser(null);
+      }
+
       if (catRes.ok) setCategories(await catRes.json());
       if (prodRes.ok) setFeaturedProducts(await prodRes.json());
       if (notifRes.ok) setNotifications(await notifRes.json());
@@ -95,6 +109,7 @@ export default function App() {
         if (curRes.ok) {
           const user = await curRes.json();
           setCurrentUser(user);
+          localStorage.setItem('agrilink_authenticated', 'true');
           fetchCartData();
           
           // Auto route to relevant tab on switch for convenience
@@ -109,6 +124,13 @@ export default function App() {
     } catch (err) {
       console.error('Switch user error:', err);
     }
+  };
+
+  // Log Out / Return to Open Guest Mode
+  const handleLogoutToGuest = () => {
+    localStorage.removeItem('agrilink_authenticated');
+    setCurrentUser(null);
+    setActiveTab('home');
   };
 
   // Add Item to Persistent Cart
@@ -196,16 +218,27 @@ export default function App() {
         onOpenNotifs={() => setNotifsModalOpen(true)}
         onOpenUSSD={() => setUssdModalOpen(true)}
         onOpenRegister={() => setRegisterModalOpen(true)}
+        onOpenBrandModal={() => setBrandModalOpen(true)}
+        onOpenAuthModal={() => setAuthModalOpen(true)}
+        onLogoutToGuest={handleLogoutToGuest}
+        onOpenCallCenter={() => setCallCenterModalOpen(true)}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1">
+      <main className="flex-1 pt-20 sm:pt-[88px]">
         {activeTab === 'home' && (
           <HomePage
             onNavigate={setActiveTab}
             categories={categories}
             featuredProducts={featuredProducts}
             onSelectProduct={(p) => setSelectedProduct(p)}
+            currentUser={currentUser}
+            onOpenLogin={() => setAuthModalOpen(true)}
+            onOpenSignUp={() => setRegisterModalOpen(true)}
+            onOpenUSSD={() => setUssdModalOpen(true)}
+            onOpenBrand={() => setBrandModalOpen(true)}
+            onLogoutToGuest={handleLogoutToGuest}
+            onOpenCallCenter={() => setCallCenterModalOpen(true)}
           />
         )}
 
@@ -303,10 +336,53 @@ export default function App() {
       <RegisterModal
         isOpen={registerModalOpen}
         onClose={() => setRegisterModalOpen(false)}
-        onRegistrationSuccess={(newUser) => {
+        onRegisteredSuccess={(newUser) => {
           fetchAuthAndPlatformData();
           setCurrentUser(newUser);
         }}
+      />
+
+      {/* Pro Authentication & Login/Sign In Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        allUsers={allUsers}
+        currentUser={currentUser}
+        onSelectExistingUser={handleSwitchUser}
+        onOpenSignUp={() => {
+          setAuthModalOpen(false);
+          setRegisterModalOpen(true);
+        }}
+        onOpenUSSD={() => {
+          setAuthModalOpen(false);
+          setUssdModalOpen(true);
+        }}
+        onContinueAsGuest={handleLogoutToGuest}
+        onOpenCallCenter={() => {
+          setAuthModalOpen(false);
+          setCallCenterModalOpen(true);
+        }}
+        onOpenBrand={() => {
+          setAuthModalOpen(false);
+          setBrandModalOpen(true);
+        }}
+      />
+
+      {/* 24/7 Call Center & Customer Desk Modal */}
+      <CallCenterModal
+        isOpen={callCenterModalOpen}
+        onClose={() => setCallCenterModalOpen(false)}
+        onOpenUSSD={() => {
+          setCallCenterModalOpen(false);
+          setUssdModalOpen(true);
+        }}
+      />
+
+      {/* Official Brand Identity & High-Res Emblem Modal */}
+      <BrandModal
+        isOpen={brandModalOpen}
+        onClose={() => setBrandModalOpen(false)}
+        onNavigateHome={() => setActiveTab('home')}
       />
 
       {/* Footer */}

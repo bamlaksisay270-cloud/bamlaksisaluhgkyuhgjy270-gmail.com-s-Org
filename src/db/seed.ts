@@ -10,74 +10,111 @@ import {
   inputSuppliers,
   inputCategories,
   inputProducts,
+  carts,
+  cartItems,
   hubs,
   drivers,
   orders,
   orderItems,
+  orderStatusHistory,
+  payments,
   deliveries,
+  hubMovements,
   qualityInspections,
   financeApplications,
   quoteRequests,
   reviews,
   notifications,
   messages,
+  auditLogs,
 } from './schema.ts';
 import { sql } from 'drizzle-orm';
 
-export async function seedDatabase() {
+export async function seedDatabase(force = false) {
   try {
     // Check if categories or users already exist
     const existingCats = await db.select().from(productCategories).limit(1);
-    if (existingCats.length > 0) {
+    if (existingCats.length > 0 && !force) {
       console.log('Database already has seeded data. Skipping initial seeding.');
       return;
     }
 
     console.log('Seeding AgriLink PostgreSQL database with authentic agricultural data...');
 
+    // If force re-seeding, clean tables in proper reverse foreign key dependency order
+    if (force || existingCats.length > 0) {
+      await db.delete(auditLogs);
+      await db.delete(messages);
+      await db.delete(notifications);
+      await db.delete(reviews);
+      await db.delete(quoteRequests);
+      await db.delete(financeApplications);
+      await db.delete(qualityInspections);
+      await db.delete(deliveries);
+      await db.delete(hubMovements);
+      await db.delete(payments);
+      await db.delete(orderStatusHistory);
+      await db.delete(orderItems);
+      await db.delete(orders);
+      await db.delete(cartItems);
+      await db.delete(carts);
+      await db.delete(inputProducts);
+      await db.delete(products);
+      await db.delete(farmFields);
+      await db.delete(farms);
+      await db.delete(drivers);
+      await db.delete(inputSuppliers);
+      await db.delete(buyerProfiles);
+      await db.delete(farmerProfiles);
+      await db.delete(users);
+      await db.delete(hubs);
+      await db.delete(inputCategories);
+      await db.delete(productCategories);
+    }
+
     // 1. Seed Product Categories
     const categoriesData = await db.insert(productCategories).values([
       {
-        name: 'Fresh Vegetables',
+        name: 'Fresh Vegetables & Tomatoes',
         slug: 'vegetables',
-        description: 'Premium grade tomatoes, onions, peppers, cabbages, and root vegetables sourced directly from Rift Valley and highland growers.',
+        description: 'Greenhouse Roma tomatoes, highland beefsteak tomatoes, onions, sweet bell peppers, crisp cabbages, and carrots sourced directly from smallholders and cooperatives.',
         icon: 'Carrot',
         imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80',
       },
       {
-        name: 'Fresh Fruits',
-        slug: 'fruits',
-        description: 'Hass avocados, sweet mangoes, papayas, strawberries, and citrus harvested at peak brix level.',
-        icon: 'Apple',
-        imageUrl: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=800&q=80',
-      },
-      {
-        name: 'Grains & Cereals',
+        name: 'Teff & Staple Grains',
         slug: 'grains',
-        description: 'Magna white teff, durum wheat, organic barley, and highland maize direct from cooperative unions.',
+        description: 'Magna super-white teff, sergegna teff, high-iron red teff, durum milling wheat, and highland hybrid maize direct from union storages.',
         icon: 'Wheat',
         imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80',
       },
       {
-        name: 'Specialty Coffee & Spices',
-        slug: 'coffee-spices',
-        description: 'Washed Yirgacheffe, Sidama Grade 1, Guji micro-lots, Korarima (Ethiopian cardamom), and dried ginger.',
-        icon: 'Coffee',
-        imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80',
+        name: 'Fresh Tubers & Root Crops',
+        slug: 'tubers-roots',
+        description: 'Shashemene highland potatoes (Jalene/Gudene), Chencha organic garlic bulbs, sweet potatoes, and highland ginger roots.',
+        icon: 'Carrot',
+        imageUrl: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80',
       },
       {
-        name: 'Cut Flowers & Herbs',
-        slug: 'flowers-herbs',
-        description: 'Fresh cut export roses, carnations, rosemary, basil, and mint from Ziway and Debre Zeit greenhouses.',
-        icon: 'Flower2',
-        imageUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80',
-      },
-      {
-        name: 'Pulses & Oilseeds',
+        name: 'Pulses & Legumes',
         slug: 'pulses-oilseeds',
-        description: 'Sesame seeds (Humera type), chickpeas, red kidney beans, and sunflower seeds for export & processing.',
+        description: 'Adet export red split lentils, Gondar Kabuli chickpeas, and highland horse beans harvested by cooperative outgrowers.',
         icon: 'Boxes',
         imageUrl: 'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        name: 'Highland Tree Fruits',
+        slug: 'fruits',
+        description: 'Export-grade Hass avocados, sweet Rift Valley papayas, highland strawberries, and fresh citrus.',
+        icon: 'Apple',
+        imageUrl: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        name: 'Fresh Herbs & Peppers',
+        slug: 'herbs-peppers',
+        description: 'Fresh Mareko Fana hot peppers, green chili peppers, rosemary, basil, and coriander from irrigated valley farms.',
+        icon: 'Sprout',
+        imageUrl: 'https://images.unsplash.com/photo-1588879460618-924b172a6b29?auto=format&fit=crop&w=800&q=80',
       },
     ]).returning();
 
@@ -438,7 +475,7 @@ export async function seedDatabase() {
         deliveryAddress: 'Bole International Airport Road, Skylight Culinary Hub, Addis Ababa',
         preferredPaymentMethod: 'CHAPA',
         creditLimitEtb: 1500000,
-        preferredCategories: ['Fresh Vegetables', 'Fresh Fruits', 'Specialty Coffee & Spices', 'Cut Flowers & Herbs'],
+        preferredCategories: ['Fresh Vegetables', 'Fresh Fruits', 'Fresh Tubers & Root Crops', 'Cut Flowers & Herbs'],
       },
     ]);
 
@@ -477,21 +514,23 @@ export async function seedDatabase() {
       isVerified: true,
     }).returning();
 
-    // 10. Seed Produce Products
+    // 10. Seed Produce Products (100% Authentic Ethiopian Farmer Crops)
     const vegCat = categoriesData[0].id;
-    const fruitCat = categoriesData[1].id;
-    const grainCat = categoriesData[2].id;
-    const coffeeCat = categoriesData[3].id;
-    const flowerCat = categoriesData[4].id;
+    const grainCat = categoriesData[1].id;
+    const tuberCat = categoriesData[2].id;
+    const pulseCat = categoriesData[3].id;
+    const fruitCat = categoriesData[4].id;
+    const herbCat = categoriesData[5].id;
 
     const seededProducts = await db.insert(products).values([
+      // 0: Fresh Greenhouse Roma Tomatoes
       {
         farmerId: farmer1.id,
         farmId: farmsData[0].id,
         categoryId: vegCat,
         name: 'Fresh Greenhouse Roma Tomatoes',
         variety: 'Ty-Shine Export Grade',
-        description: 'Firm, uniform-red greenhouse Roma tomatoes with thick flesh and superior shelf life. Ideal for commercial supermarkets, hotels, and processing.',
+        description: 'Firm, uniform deep-red greenhouse Roma tomatoes with thick flesh and superior transport shelf life. Harvested daily with stem-on freshness.',
         grade: 'GRADE_1_EXPORT',
         pricePerUnitEtb: 75,
         unit: 'KG',
@@ -512,13 +551,258 @@ export async function seedDatabase() {
         status: 'ACTIVE',
         shelfLifeDays: 14,
       },
+      // 1: Fresh Salad Beefsteak Tomatoes
+      {
+        farmerId: farmer2.id,
+        farmId: farmsData[1].id,
+        categoryId: vegCat,
+        name: 'Highland Salad Beefsteak Tomatoes',
+        variety: 'Anna F1 Highland Hybrid',
+        description: 'Juicy, large multi-locular slicing beefsteak tomatoes grown in volcanic soils. Sweet balanced acidity, ideal for hotels, restaurants, and fresh retail.',
+        grade: 'GRADE_1_LOCAL',
+        pricePerUnitEtb: 82,
+        unit: 'KG',
+        availableQuantity: 3200,
+        minOrderQuantity: 40,
+        harvestDate: '2026-08-21',
+        expectedAvailability: 'Immediate Dispatch',
+        farmLocation: 'Holeta Agro-Valley Outgrowers',
+        region: 'Oromia',
+        images: [
+          'https://images.unsplash.com/photo-1546470427-0d4db154ceb7?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80',
+        ],
+        lotBatchNumber: 'LOT-HLT-TOM-2026-08',
+        qualityScore: 96,
+        certifications: ['Ethiopian Quality Standard', 'Traceable Origin'],
+        isOrganic: false,
+        status: 'ACTIVE',
+        shelfLifeDays: 12,
+      },
+      // 2: Magna Super-White Teff Grain
+      {
+        farmerId: farmer1.id,
+        farmId: farmsData[0].id,
+        categoryId: grainCat,
+        name: 'Magna Super-White Teff Grain',
+        variety: 'Quncho DZ-Cr-387 (Super White)',
+        description: 'Double-cleaned, high-iron, gluten-free super-white Teff grain harvested from the fertile black soils of East Shewa (Ada’a / Debre Zeit). Purity 99.8%.',
+        grade: 'GRADE_1_EXPORT',
+        pricePerUnitEtb: 11500,
+        unit: 'QUINTAL', // 100kg
+        availableQuantity: 140,
+        minOrderQuantity: 5,
+        harvestDate: '2026-07-30',
+        expectedAvailability: 'Immediate Dispatch',
+        farmLocation: 'Wonji & Ada’a Highland Parcel, East Shewa',
+        region: 'Oromia',
+        images: [
+          'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80',
+        ],
+        lotBatchNumber: 'LOT-WNJ-TEF-2026-07',
+        qualityScore: 99,
+        certifications: ['Ethiopian Grain Board Certificate', 'Purity 99.8%'],
+        isOrganic: true,
+        status: 'ACTIVE',
+        shelfLifeDays: 365,
+      },
+      // 3: Sergegna Mixed Brown-White Teff Grain
+      {
+        farmerId: farmer2.id,
+        farmId: farmsData[1].id,
+        categoryId: grainCat,
+        name: 'Sergegna Mixed White-Brown Teff Grain',
+        variety: 'Kora DZ-01-196 Traditional Grain',
+        description: 'Nutrient-dense Sergegna blended grain harvested from Gojjam highlands. Rich in dietary fiber, phosphorus, and essential amino acids.',
+        grade: 'GRADE_1_LOCAL',
+        pricePerUnitEtb: 9800,
+        unit: 'QUINTAL',
+        availableQuantity: 95,
+        minOrderQuantity: 5,
+        harvestDate: '2026-08-05',
+        expectedAvailability: 'Immediate Dispatch',
+        farmLocation: 'East Gojjam Cooperative Union Hub',
+        region: 'Amhara',
+        images: [
+          'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80',
+        ],
+        lotBatchNumber: 'LOT-GJM-TEF-2026-08',
+        qualityScore: 97,
+        certifications: ['MoA Grain Certification', 'Residue Clean'],
+        isOrganic: true,
+        status: 'ACTIVE',
+        shelfLifeDays: 365,
+      },
+      // 4: Fresh Shashemene Highland Potatoes
+      {
+        farmerId: farmer1.id,
+        farmId: farmsData[0].id,
+        categoryId: tuberCat,
+        name: 'Fresh Shashemene Highland Potatoes',
+        variety: 'Jalene & Gudene Red-Skin Elite',
+        description: 'High dry-matter highland cooking potatoes harvested fresh from Southern volcanic loam soils. Thick skin, low bruising, superior frying and boiling texture.',
+        grade: 'GRADE_1_LOCAL',
+        pricePerUnitEtb: 48,
+        unit: 'KG',
+        availableQuantity: 7500,
+        minOrderQuantity: 100,
+        harvestDate: '2026-08-22',
+        expectedAvailability: 'Immediate Dispatch',
+        farmLocation: 'Shashemene Highland Outgrower Cluster',
+        region: 'Oromia',
+        images: [
+          'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80',
+        ],
+        lotBatchNumber: 'LOT-SHS-POT-2026-08',
+        qualityScore: 97,
+        certifications: ['Ethiopian Quality Standard', '100% Farm Fresh'],
+        isOrganic: true,
+        status: 'ACTIVE',
+        shelfLifeDays: 45,
+      },
+      // 5: Chencha Organic White Garlic Bulbs
+      {
+        farmerId: farmer2.id,
+        farmId: farmsData[1].id,
+        categoryId: tuberCat,
+        name: 'Chencha Organic White Garlic Bulbs',
+        variety: 'Chencha Giant White (Local Highland)',
+        description: 'Sun-cured, pungent organic white garlic bulbs with tight skins and high allicin content. Grown at 2,700m elevation in the Gamo highlands.',
+        grade: 'GRADE_1_EXPORT',
+        pricePerUnitEtb: 165,
+        unit: 'KG',
+        availableQuantity: 1800,
+        minOrderQuantity: 25,
+        harvestDate: '2026-08-16',
+        expectedAvailability: 'Immediate Dispatch',
+        farmLocation: 'Chencha Outgrower Network, Gamo',
+        region: 'SNNPR',
+        images: [
+          'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=800&q=80',
+        ],
+        lotBatchNumber: 'LOT-CHN-GAR-2026-08',
+        qualityScore: 99,
+        certifications: ['Certified Organic', 'Purity Tested'],
+        isOrganic: true,
+        status: 'ACTIVE',
+        shelfLifeDays: 90,
+      },
+      // 6: Highland Red Bombay Onions
+      {
+        farmerId: farmer1.id,
+        farmId: farmsData[0].id,
+        categoryId: vegCat,
+        name: 'Highland Red Bombay Onions',
+        variety: 'Bombay Red Premium Cured',
+        description: 'Dry cured, deep burgundy color, high pungency red onions with tight skins and low moisture content for extended transit and storage.',
+        grade: 'GRADE_1_LOCAL',
+        pricePerUnitEtb: 62,
+        unit: 'KG',
+        availableQuantity: 6200,
+        minOrderQuantity: 100,
+        harvestDate: '2026-08-15',
+        expectedAvailability: 'Immediate Dispatch',
+        farmLocation: 'Wonji & Meki-Batu Corridor, East Shewa',
+        region: 'Oromia',
+        images: [
+          'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=800&q=80',
+        ],
+        lotBatchNumber: 'LOT-WNJ-ONN-2026-08',
+        qualityScore: 95,
+        certifications: ['Ethiopian Quality Standard'],
+        isOrganic: false,
+        status: 'ACTIVE',
+        shelfLifeDays: 45,
+      },
+      // 7: Green Bell Peppers & Hot Mareko Fana Chilies
+      {
+        farmerId: farmer2.id,
+        farmId: farmsData[1].id,
+        categoryId: herbCat,
+        name: 'Green Bell Peppers & Mareko Fana Chilies',
+        variety: 'California Wonder & Mareko Fana',
+        description: 'Glossy thick-walled green bell peppers and authentic sun-ripened pungent Mareko Fana chili peppers grown under drip irrigation.',
+        grade: 'GRADE_1_EXPORT',
+        pricePerUnitEtb: 85,
+        unit: 'KG',
+        availableQuantity: 2400,
+        minOrderQuantity: 30,
+        harvestDate: '2026-08-21',
+        expectedAvailability: 'Immediate Dispatch',
+        farmLocation: 'Alaba & Ziway Irrigated Farms',
+        region: 'Oromia',
+        images: [
+          'https://images.unsplash.com/photo-1588879460618-924b172a6b29?auto=format&fit=crop&w=800&q=80',
+        ],
+        lotBatchNumber: 'LOT-ALB-PEP-2026-08',
+        qualityScore: 98,
+        certifications: ['GlobalG.A.P', 'Freshness Seal'],
+        isOrganic: true,
+        status: 'ACTIVE',
+        shelfLifeDays: 14,
+      },
+      // 8: Bale Highland Durum Wheat Grain
+      {
+        farmerId: farmer1.id,
+        farmId: farmsData[0].id,
+        categoryId: grainCat,
+        name: 'Bale Highland Durum Wheat Grain',
+        variety: 'Utuba Hard Amber Milling Wheat',
+        description: 'High-protein amber durum wheat harvested from the fertile wheat plains of Bale and Arsi. Ideal for flour milling, bakeries, and pasta production.',
+        grade: 'GRADE_1_LOCAL',
+        pricePerUnitEtb: 7200,
+        unit: 'QUINTAL',
+        availableQuantity: 210,
+        minOrderQuantity: 10,
+        harvestDate: '2026-07-20',
+        expectedAvailability: 'Immediate Dispatch',
+        farmLocation: 'Arsi-Bale Robe Plain Farm Union',
+        region: 'Oromia',
+        images: [
+          'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80',
+        ],
+        lotBatchNumber: 'LOT-BAL-WHT-2026-07',
+        qualityScore: 96,
+        certifications: ['Ethiopian Grain Board Certificate', 'Protein >13.5%'],
+        isOrganic: false,
+        status: 'ACTIVE',
+        shelfLifeDays: 365,
+      },
+      // 9: Adet Super Red Split Lentils
+      {
+        farmerId: farmer2.id,
+        farmId: farmsData[1].id,
+        categoryId: pulseCat,
+        name: 'Adet Super Red Split Lentils',
+        variety: 'Alemaya Red Lentil Elite',
+        description: 'Machine-cleaned, uniform size, quick-cooking high-iron red lentils sourced directly from West Gojjam farmers. Purity >99.5%.',
+        grade: 'GRADE_1_EXPORT',
+        pricePerUnitEtb: 14200,
+        unit: 'QUINTAL',
+        availableQuantity: 80,
+        minOrderQuantity: 5,
+        harvestDate: '2026-08-01',
+        expectedAvailability: 'Immediate Dispatch',
+        farmLocation: 'Adet Research Agricultural Cluster',
+        region: 'Amhara',
+        images: [
+          'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=800&q=80',
+        ],
+        lotBatchNumber: 'LOT-ADT-LNT-2026-08',
+        qualityScore: 99,
+        certifications: ['Export Quality Pass', 'MoA Certified'],
+        isOrganic: true,
+        status: 'ACTIVE',
+        shelfLifeDays: 365,
+      },
+      // 10: Export-Grade Hass Avocados
       {
         farmerId: farmer1.id,
         farmId: farmsData[0].id,
         categoryId: fruitCat,
         name: 'Export-Grade Hass Avocados',
         variety: 'Hass Grafted (Size 14-18)',
-        description: 'Pebbly-skinned Hass avocados grown under optimal highland climate. High healthy monounsaturated fat content and creamy texture.',
+        description: 'Pebbly-skinned Hass avocados grown under optimal highland climate. High healthy monounsaturated fat content and rich creamy texture.',
         grade: 'GRADE_1_EXPORT',
         pricePerUnitEtb: 140,
         unit: 'KG',
@@ -539,136 +823,86 @@ export async function seedDatabase() {
         status: 'ACTIVE',
         shelfLifeDays: 21,
       },
+      // 11: Fresh Holeta Green Cabbage & Crisp Carrots
       {
-        farmerId: farmer1.id,
-        farmId: farmsData[0].id,
+        farmerId: farmer2.id,
+        farmId: farmsData[1].id,
         categoryId: vegCat,
-        name: 'Highland Red Bombay Onions',
-        variety: 'Bombay Red Premium',
-        description: 'Dry cured, deep burgundy color, high pungency red onions with tight skins and low moisture for long transit storage.',
+        name: 'Fresh Holeta Cabbage & Crisp Orange Carrots',
+        variety: 'Copenhagen Market & Nantes Carrots',
+        description: 'Tight-headed, sweet green cabbage and freshly washed crisp highland carrots harvested daily from Holeta research valleys.',
         grade: 'GRADE_1_LOCAL',
-        pricePerUnitEtb: 62,
+        pricePerUnitEtb: 38,
         unit: 'KG',
-        availableQuantity: 6200,
-        minOrderQuantity: 100,
-        harvestDate: '2026-08-15',
+        availableQuantity: 5800,
+        minOrderQuantity: 80,
+        harvestDate: '2026-08-22',
         expectedAvailability: 'Immediate Dispatch',
-        farmLocation: 'Wonji Gefersa, East Shewa',
+        farmLocation: 'Holeta Agricultural Valley Hub',
         region: 'Oromia',
         images: [
-          'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80',
         ],
-        lotBatchNumber: 'LOT-WNJ-ONN-2026-08',
+        lotBatchNumber: 'LOT-HLT-CAB-2026-08',
         qualityScore: 95,
         certifications: ['Ethiopian Quality Standard'],
-        isOrganic: false,
+        isOrganic: true,
         status: 'ACTIVE',
-        shelfLifeDays: 45,
+        shelfLifeDays: 20,
       },
+      // 12: Bako Hybrid White Maize Grain
       {
         farmerId: farmer1.id,
         farmId: farmsData[0].id,
         categoryId: grainCat,
-        name: 'Magna Super-White Teff Grain',
-        variety: 'Quncho DZ-Cr-387 (Super White)',
-        description: 'Double-cleaned, high-iron, gluten-free super-white Teff grain harvested from the fertile soils of East Shewa.',
-        grade: 'GRADE_1_EXPORT',
-        pricePerUnitEtb: 11500,
-        unit: 'QUINTAL', // 100kg
-        availableQuantity: 120,
-        minOrderQuantity: 5,
-        harvestDate: '2026-07-30',
+        name: 'Bako Hybrid White Maize Grain',
+        variety: 'BH-661 High-Starch Hybrid',
+        description: 'Dry-shelled, large kernel white maize harvested from West Oromia. Moisture <13%, ideal for posho flour, animal feed, and food manufacturing.',
+        grade: 'GRADE_1_LOCAL',
+        pricePerUnitEtb: 4800,
+        unit: 'QUINTAL',
+        availableQuantity: 320,
+        minOrderQuantity: 10,
+        harvestDate: '2026-07-28',
         expectedAvailability: 'Immediate Dispatch',
-        farmLocation: 'Wonji Highland Parcel, Oromia',
+        farmLocation: 'Bako Agricultural Center, West Shewa',
         region: 'Oromia',
         images: [
           'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80',
         ],
-        lotBatchNumber: 'LOT-WNJ-TEF-2026-07',
-        qualityScore: 99,
-        certifications: ['Ethiopian Grain Board Certificate', 'Purity 99.8%'],
-        isOrganic: true,
+        lotBatchNumber: 'LOT-BKO-MAZ-2026-07',
+        qualityScore: 95,
+        certifications: ['MoA Grain Certification', 'Aflatoxin Tested Clean'],
+        isOrganic: false,
         status: 'ACTIVE',
         shelfLifeDays: 365,
       },
+      // 13: Highland Sweet Potatoes & Fresh Ginger Roots
       {
         farmerId: farmer2.id,
         farmId: farmsData[1].id,
-        categoryId: fruitCat,
-        name: 'Hydroponic Sweet Strawberries',
-        variety: 'San Andreas Large Berry',
-        description: 'Vibrant red, fragrant strawberries harvested daily into ventilated 250g punnets. Maintained strictly at 2-4°C cold chain.',
-        grade: 'GRADE_1_EXPORT',
-        pricePerUnitEtb: 220,
+        categoryId: tuberCat,
+        name: 'Highland Sweet Potatoes & Fresh Ginger',
+        variety: 'Kulfo Orange-Fleshed & Tepi Ginger',
+        description: 'Vitamin-A rich orange-fleshed sweet potatoes paired with aromatic freshly washed ginger rhizomes from highland cooperative farmers.',
+        grade: 'GRADE_1_LOCAL',
+        pricePerUnitEtb: 58,
         unit: 'KG',
-        availableQuantity: 850,
-        minOrderQuantity: 10,
-        harvestDate: '2026-08-21',
-        expectedAvailability: 'Daily Harvest',
-        farmLocation: 'Lake Ziway North Shore, Oromia',
-        region: 'Oromia',
-        images: [
-          'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=800&q=80',
-          'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=800&q=80',
-        ],
-        lotBatchNumber: 'LOT-ZWY-STR-2026-08',
-        qualityScore: 97,
-        certifications: ['Cold-Chain Guaranteed', 'GlobalG.A.P'],
-        isOrganic: false,
-        status: 'ACTIVE',
-        shelfLifeDays: 8,
-      },
-      {
-        farmerId: farmer2.id,
-        farmId: farmsData[1].id,
-        categoryId: flowerCat,
-        name: 'Export Cut Red Roses (Rhodos)',
-        variety: 'Rhodos 60-70cm Stems',
-        description: 'Velvety dark-red floricultural roses grown in climate-controlled Ziway greenhouses. Packed 20 stems per bunch.',
-        grade: 'GRADE_1_EXPORT',
-        pricePerUnitEtb: 380,
-        unit: 'CRATE', // bunch / crate
-        availableQuantity: 400,
-        minOrderQuantity: 10,
-        harvestDate: '2026-08-21',
-        expectedAvailability: 'Daily Harvest',
-        farmLocation: 'Lake Ziway Flower Park, Oromia',
-        region: 'Oromia',
-        images: [
-          'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80',
-        ],
-        lotBatchNumber: 'LOT-ZWY-ROS-2026-08',
-        qualityScore: 99,
-        certifications: ['FairTrade Africa', 'EHPEA Gold Code'],
-        isOrganic: false,
-        status: 'ACTIVE',
-        shelfLifeDays: 12,
-      },
-      {
-        farmerId: farmer1.id,
-        farmId: farmsData[0].id,
-        categoryId: coffeeCat,
-        name: 'Washed Yirgacheffe Grade 1 Specialty Coffee Beans',
-        variety: 'Heirloom Ethiopian Typica',
-        description: 'Cup score 89.5. Floral jasmine aroma, bergamot citrus notes, and refined honey sweetness from Gedeo highlands.',
-        grade: 'GRADE_1_EXPORT',
-        pricePerUnitEtb: 19500,
-        unit: 'BAG', // 60kg jute bag
-        availableQuantity: 75,
-        minOrderQuantity: 2,
-        harvestDate: '2026-06-15',
+        availableQuantity: 4100,
+        minOrderQuantity: 60,
+        harvestDate: '2026-08-20',
         expectedAvailability: 'Immediate Dispatch',
-        farmLocation: 'Yirgacheffe Highland Micro-Station',
+        farmLocation: 'Hawassa & Welayta Highland Outgrowers',
         region: 'SNNPR',
         images: [
-          'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80',
         ],
-        lotBatchNumber: 'LOT-YRG-COF-2026-06',
-        qualityScore: 99,
-        certifications: ['Rainforest Alliance', 'Specialty Coffee Association 89.5+'],
+        lotBatchNumber: 'LOT-WLT-SWP-2026-08',
+        qualityScore: 97,
+        certifications: ['Ethiopian Quality Standard'],
         isOrganic: true,
         status: 'ACTIVE',
-        shelfLifeDays: 365,
+        shelfLifeDays: 30,
       },
     ]).returning();
 
@@ -760,6 +994,8 @@ export async function seedDatabase() {
       deliveryContactName: 'Sara Kebede (Head Chef Procurement)',
       deliveryContactPhone: '+251 91 556 7788',
       requestedDeliveryDate: '2026-08-22',
+      tinNumber: 'TIN-00482910-ADDIS',
+      payerAccountNumber: '0915567788 (Telebirr SuperApp)',
       notes: 'Please ensure temperature-controlled transit below 6°C for Hass Avocados and Strawberries.',
     }).returning();
 
@@ -767,30 +1003,44 @@ export async function seedDatabase() {
       {
         orderId: order1[0].id,
         itemType: 'PRODUCE',
-        productId: seededProducts[1].id, // Hass Avocados
+        productId: seededProducts[0].id, // Roma Tomatoes
         sellerId: farmer1.id,
-        name: 'Export-Grade Hass Avocados',
+        name: 'Fresh Greenhouse Roma Tomatoes',
         grade: 'GRADE_1_EXPORT',
         unit: 'KG',
-        quantity: 300,
-        unitPriceEtb: 140,
-        subtotalEtb: 42000,
-        lotBatchNumber: 'LOT-WNJ-AVO-2026-08',
+        quantity: 400,
+        unitPriceEtb: 75,
+        subtotalEtb: 30000,
+        lotBatchNumber: 'LOT-WNJ-TOM-2026-08',
       },
       {
         orderId: order1[0].id,
         itemType: 'PRODUCE',
-        productId: seededProducts[4].id, // Strawberries
-        sellerId: farmer2.id,
-        name: 'Hydroponic Sweet Strawberries',
+        productId: seededProducts[10].id, // Hass Avocados
+        sellerId: farmer1.id,
+        name: 'Export-Grade Hass Avocados',
         grade: 'GRADE_1_EXPORT',
         unit: 'KG',
-        quantity: 100,
-        unitPriceEtb: 220,
-        subtotalEtb: 22000,
-        lotBatchNumber: 'LOT-ZWY-STR-2026-08',
+        quantity: 250,
+        unitPriceEtb: 140,
+        subtotalEtb: 35000,
+        lotBatchNumber: 'LOT-WNJ-AVO-2026-08',
       },
     ]);
+
+    // Payment for Order 1 (Telebirr)
+    await db.insert(payments).values({
+      orderId: order1[0].id,
+      userId: buyer2.id,
+      amountEtb: 69800,
+      currency: 'ETB',
+      provider: 'TELEBIRR',
+      transactionRef: 'TX-TELEBIRR-8829104',
+      status: 'PAID',
+      paymentMethod: 'MOBILE_MONEY',
+      payerAccountNumber: '0915567788',
+      paidAt: new Date(Date.now() - 3600000 * 5),
+    });
 
     // Seed Delivery Record
     await db.insert(deliveries).values({
@@ -798,7 +1048,7 @@ export async function seedDatabase() {
       driverId: driverProfile[0].id,
       deliveryModel: 'HUB_CROSS_DOCK',
       hubId: hubsData[0].id,
-      pickupLocation: 'Wonji Horizon Main Estate & Ziway Lakeside Hub',
+      pickupLocation: 'Wonji Horizon Main Estate & Adama Fast-Transit Hub',
       dropoffLocation: 'Skylight Hotel Central Commissary, Bole, Addis Ababa',
       pickupLat: 8.4521,
       pickupLng: 39.2942,
@@ -808,6 +1058,145 @@ export async function seedDatabase() {
       currentLng: 38.8200,
       status: 'IN_TRANSIT',
       estimatedArrival: 'Today at 3:30 PM (ETB Time)',
+    });
+
+    // Seed Order 2 (Teff Grain Order by Addis Supermarket)
+    const order2 = await db.insert(orders).values({
+      orderNumber: 'AGR-2026-08-4102',
+      buyerId: buyer1.id, // Dawit Haile / Addis Supermarket
+      orderType: 'PRODUCE',
+      totalAmountEtb: 115000,
+      deliveryFeeEtb: 2500,
+      serviceFeeEtb: 2300,
+      grandTotalEtb: 119800,
+      paymentStatus: 'PAID',
+      orderStatus: 'CONFIRMED',
+      deliveryModel: 'DIRECT',
+      hubId: hubsData[1].id,
+      deliveryAddress: 'Addis Supermarket Central Storehouse, Kazanchis, Addis Ababa',
+      deliveryRegion: 'Addis Ababa',
+      deliveryContactName: 'Dawit Haile',
+      deliveryContactPhone: '+251 91 144 5566',
+      requestedDeliveryDate: '2026-08-25',
+      tinNumber: 'TIN-00918234-ET',
+      payerAccountNumber: '100018274920 (CBE Birr)',
+      notes: 'Deliver 10 quintals of double-sifted Magna Teff with official Ethiopian grain standards inspection seal.',
+    }).returning();
+
+    await db.insert(orderItems).values([
+      {
+        orderId: order2[0].id,
+        itemType: 'PRODUCE',
+        productId: seededProducts[2].id, // Magna White Teff
+        sellerId: farmer1.id,
+        name: 'Magna Super-White Teff Grain',
+        grade: 'GRADE_1_EXPORT',
+        unit: 'QUINTAL',
+        quantity: 10,
+        unitPriceEtb: 11500,
+        subtotalEtb: 115000,
+        lotBatchNumber: 'LOT-DBZ-TEFF-2026-01',
+      },
+    ]);
+
+    await db.insert(payments).values({
+      orderId: order2[0].id,
+      userId: buyer1.id,
+      amountEtb: 119800,
+      currency: 'ETB',
+      provider: 'CBE_BIRR',
+      transactionRef: 'TX-CBE-99182374',
+      status: 'PAID',
+      paymentMethod: 'CBE_DIRECT',
+      payerAccountNumber: '100018274920',
+      paidAt: new Date(Date.now() - 3600000 * 12),
+    });
+
+    await db.insert(deliveries).values({
+      orderId: order2[0].id,
+      driverId: driverProfile[0].id,
+      deliveryModel: 'DIRECT',
+      hubId: hubsData[1].id,
+      pickupLocation: 'Adaa Teff Cooperative, Bishoftu / Debre Zeit',
+      dropoffLocation: 'Addis Supermarket Kazanchis, Addis Ababa',
+      status: 'ASSIGNED',
+      estimatedArrival: 'Tomorrow morning 10:00 AM',
+    });
+
+    // Seed Order 3 (Highland Potatoes & Chencha Garlic by Hilton Addis)
+    const order3 = await db.insert(orders).values({
+      orderNumber: 'AGR-2026-08-2205',
+      buyerId: buyer2.id,
+      orderType: 'PRODUCE',
+      totalAmountEtb: 40500,
+      deliveryFeeEtb: 2000,
+      serviceFeeEtb: 810,
+      grandTotalEtb: 43310,
+      paymentStatus: 'ESCROW_HELD',
+      orderStatus: 'PREPARING',
+      deliveryModel: 'HUB_CROSS_DOCK',
+      hubId: hubsData[0].id,
+      deliveryAddress: 'Menelik II Avenue, Hilton Addis Culinary Department',
+      deliveryRegion: 'Addis Ababa',
+      deliveryContactName: 'Marta Tadesse',
+      deliveryContactPhone: '+251 91 334 9900',
+      requestedDeliveryDate: '2026-08-26',
+      tinNumber: 'TIN-00129481-HLT',
+      payerAccountNumber: '0913349900 (Awash Agribusiness Wallet)',
+      notes: 'Grade 1 Shashemene Highland potatoes for hotel kitchen.',
+    }).returning();
+
+    await db.insert(orderItems).values([
+      {
+        orderId: order3[0].id,
+        itemType: 'PRODUCE',
+        productId: seededProducts[4].id, // Shashemene Potatoes
+        sellerId: farmer2.id,
+        name: 'Fresh Shashemene Highland Potatoes',
+        grade: 'GRADE_1_LOCAL',
+        unit: 'KG',
+        quantity: 500,
+        unitPriceEtb: 48,
+        subtotalEtb: 24000,
+        lotBatchNumber: 'LOT-SHS-POT-2026-08',
+      },
+      {
+        orderId: order3[0].id,
+        itemType: 'PRODUCE',
+        productId: seededProducts[5].id, // Chencha Garlic
+        sellerId: farmer2.id,
+        name: 'Chencha Organic White Garlic Bulbs',
+        grade: 'GRADE_1_EXPORT',
+        unit: 'KG',
+        quantity: 100,
+        unitPriceEtb: 165,
+        subtotalEtb: 16500,
+        lotBatchNumber: 'LOT-CHN-GAR-2026-08',
+      },
+    ]);
+
+    await db.insert(payments).values({
+      orderId: order3[0].id,
+      userId: buyer2.id,
+      amountEtb: 43310,
+      currency: 'ETB',
+      provider: 'AWASH_BANK',
+      transactionRef: 'TX-AWASH-4491028',
+      status: 'ESCROW_HELD',
+      paymentMethod: 'ESCROW_ACCOUNT',
+      payerAccountNumber: '0913349900',
+      paidAt: new Date(Date.now() - 3600000 * 2),
+    });
+
+    await db.insert(deliveries).values({
+      orderId: order3[0].id,
+      driverId: null,
+      deliveryModel: 'HUB_CROSS_DOCK',
+      hubId: hubsData[0].id,
+      pickupLocation: 'Shashemene Highland Farmers Hub, Oromia',
+      dropoffLocation: 'Hilton Addis Main Loading Bay',
+      status: 'PENDING_ASSIGNMENT',
+      estimatedArrival: 'Thursday 2:00 PM',
     });
 
     // 13. Seed Quality Inspections
@@ -828,7 +1217,7 @@ export async function seedDatabase() {
         certificateUrl: 'https://agrilink.et/certs/QC-2026-08-WNJ-01.pdf',
       },
       {
-        productId: seededProducts[1].id,
+        productId: seededProducts[10].id,
         orderId: order1[0].id,
         batchNumber: 'LOT-WNJ-AVO-2026-08',
         inspectorId: seededUsers[8].id,
@@ -851,9 +1240,9 @@ export async function seedDatabase() {
         institutionId: seededUsers[6].id, // Awash Bank
         loanType: 'EQUIPMENT_FINANCING',
         amountRequestedEtb: 350000,
-        purpose: 'Installation of automated drip irrigation fertigation system and 5,000 sq meter commercial greenhouse expansion.',
+        purpose: 'Installation of automated drip irrigation fertigation system and 5,000 sq meter commercial greenhouse expansion for Roma tomatoes.',
         farmId: farmsData[0].id,
-        targetCrop: 'Export Hass Avocados & Greenhouse Tomatoes',
+        targetCrop: 'Greenhouse Roma Tomatoes & Magna White Teff',
         expectedYieldTons: 35.0,
         expectedRevenueEtb: 1450000,
         repaymentPeriodMonths: 18,
@@ -867,10 +1256,10 @@ export async function seedDatabase() {
         institutionId: seededUsers[6].id,
         loanType: 'INPUT_FINANCING',
         amountRequestedEtb: 120000,
-        purpose: 'Procurement of certified hybrid strawberry runners, bio-pesticides, and cold storage boxes for 2026/27 harvest cycle.',
+        purpose: 'Procurement of certified highland potato seed tubers (Jalene), bio-pesticides, and organic soil amendments for 2026/27 harvest cycle.',
         farmId: farmsData[1].id,
-        targetCrop: 'Hydroponic Strawberries',
-        expectedYieldTons: 12.0,
+        targetCrop: 'Shashemene Highland Potatoes & Chencha Garlic',
+        expectedYieldTons: 25.0,
         expectedRevenueEtb: 650000,
         repaymentPeriodMonths: 6,
         status: 'UNDER_REVIEW',
@@ -885,7 +1274,7 @@ export async function seedDatabase() {
       {
         businessBuyerId: buyer2.id,
         sellerId: farmer1.id,
-        productId: seededProducts[3].id, // White Teff
+        productId: seededProducts[2].id, // Magna White Teff
         productName: 'Magna Super-White Teff Grain',
         requestedQuantity: 25,
         unit: 'QUINTAL',
@@ -905,10 +1294,10 @@ export async function seedDatabase() {
         orderId: order1[0].id,
         reviewerId: buyer2.id,
         targetType: 'PRODUCT',
-        targetId: seededProducts[1].id,
+        targetId: seededProducts[0].id,
         rating: 5,
-        title: 'Superb Hass Avocados — Exceptional Culinary Quality',
-        comment: 'We served these avocados in our five-star dining rooms. Uniform ripeness, silky texture, zero waste. Will be placing recurring weekly bulk orders.',
+        title: 'Superb Roma Tomatoes — Exceptional Culinary Quality',
+        comment: 'We received 400kg of pristine greenhouse Roma tomatoes at our hotel commissary. Uniform deep red ripeness, zero bruises, excellent sauce yield.',
         isVerifiedPurchase: true,
       },
       {
@@ -917,7 +1306,7 @@ export async function seedDatabase() {
         targetType: 'FARMER',
         targetId: farmer1.id,
         rating: 5,
-        title: 'Professional and Reliable Partner',
+        title: 'Professional and Reliable Farm Partner',
         comment: 'Farmer Bekele maintains highest agricultural hygiene and cold chain handling. AgriLink verified traceability barcode made audit effortless.',
         isVerifiedPurchase: true,
       },

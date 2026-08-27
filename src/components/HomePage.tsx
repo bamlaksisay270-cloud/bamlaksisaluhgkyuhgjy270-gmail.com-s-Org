@@ -1,5 +1,9 @@
 import React from 'react';
 import agrilinkLogo from '../assets/images/agrilink_logo_1787551924489.jpg';
+import farmTractorIrrigation from '../assets/images/farm_tractor_irrigation_1787815687313.jpg';
+import farmTractorSunrise from '../assets/images/farm_tractor_sunrise_1787815703199.jpg';
+import digitalProduceApp from '../assets/images/digital_produce_app_1787815717840.jpg';
+import ethiopiaGreenhouseFarm from '../assets/images/ethiopia_greenhouse_farm_1787814574646.jpg';
 import {
   Sprout,
   ShieldCheck,
@@ -16,14 +20,30 @@ import {
   Clock,
   Boxes,
   Zap,
+  LogIn,
+  UserPlus,
+  Phone,
+  Store,
+  DollarSign,
+  ChevronRight,
+  Smartphone,
+  Tractor,
 } from 'lucide-react';
-import { ProductCategory, Product } from '../types/index.ts';
+import { ProductCategory, Product, User } from '../types/index.ts';
+import { IntroHero } from './IntroHero.tsx';
 
 interface HomePageProps {
   onNavigate: (tab: string) => void;
   categories: ProductCategory[];
   featuredProducts: Product[];
   onSelectProduct: (product: Product) => void;
+  currentUser: User | null;
+  onOpenLogin: () => void;
+  onOpenSignUp: () => void;
+  onOpenUSSD: () => void;
+  onOpenBrand: () => void;
+  onLogoutToGuest?: () => void;
+  onOpenCallCenter?: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -31,66 +51,68 @@ export const HomePage: React.FC<HomePageProps> = ({
   categories,
   featuredProducts,
   onSelectProduct,
+  currentUser,
+  onOpenLogin,
+  onOpenSignUp,
+  onOpenUSSD,
+  onOpenBrand,
+  onLogoutToGuest,
+  onOpenCallCenter,
 }) => {
   return (
-    <div className="space-y-16 py-6">
-      {/* Hero Section */}
+    <div className="space-y-16 pb-12">
+      {/* Intro Page Hero & Interactive Sign In / Register Portal */}
+      <IntroHero
+        currentUser={currentUser}
+        onExploreMarket={() => onNavigate('marketplace')}
+        onOpenLogin={onOpenLogin}
+        onOpenSignUp={onOpenSignUp}
+        onOpenUSSD={onOpenUSSD}
+        onOpenBrand={onOpenBrand}
+        onLogoutToGuest={onLogoutToGuest}
+        onOpenCallCenter={onOpenCallCenter}
+      />
+
+      {/* Quick Value Onboarding Banner for New & Returning Stakeholders */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-950 via-zinc-900 to-emerald-900 text-white shadow-2xl border border-emerald-800/40">
-          <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:24px_24px] opacity-15"></div>
-          
-          <div className="relative z-10 p-8 sm:p-12 lg:p-16 max-w-4xl space-y-6 flex flex-col md:flex-row md:items-center md:gap-10">
-            <div className="space-y-6 flex-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-400/30 backdrop-blur-xs">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
-                Ethiopia & African Agricultural Trade Grid
-              </div>
+        <div className="bg-emerald-50 border border-emerald-200/80 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
+          <div className="space-y-2 text-center md:text-left">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 bg-emerald-100/80 px-2.5 py-0.5 rounded-full inline-block">
+              Integrated National Solution
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-zinc-950">
+              How AgriLink Works For Your Agricultural Business
+            </h2>
+            <p className="text-xs sm:text-sm text-zinc-600 max-w-2xl">
+              From smallholder plots in Wonji & Arsi to processing lines in Addis Ababa, explore transparent trade, direct cold-chain transport, and bank-grade escrow.
+            </p>
+          </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08]">
-                Connecting <span className="text-emerald-400">Farmers</span>, Markets, Finance & Logistics.
-              </h1>
-
-              <p className="text-base sm:text-lg text-emerald-100/90 leading-relaxed font-normal">
-                Direct-to-grower transparency with batch traceability, cold-chain aggregation hubs in Addis Ababa & Adama, and real-time escrow settlements in Ethiopian Birr (ETB).
-              </p>
-
-              <div className="flex flex-wrap gap-3 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+            {!currentUser ? (
+              <>
                 <button
-                  onClick={() => onNavigate('marketplace')}
-                  className="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold shadow-lg shadow-emerald-700/30 flex items-center gap-2 transition-all cursor-pointer hover:scale-[1.02]"
+                  onClick={onOpenLogin}
+                  className="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-300 text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
                 >
-                  Explore Live Produce <ArrowRight className="h-4 w-4" />
+                  <LogIn className="h-4 w-4 text-emerald-700" /> Log In
                 </button>
                 <button
-                  onClick={() => onNavigate('farmer-portal')}
-                  className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold backdrop-blur-xs border border-white/20 flex items-center gap-2 transition-all cursor-pointer"
+                  onClick={onOpenSignUp}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
                 >
-                  <Sprout className="h-4 w-4" /> For Farmers & Producers
+                  <UserPlus className="h-4 w-4" /> Sign Up / Join Grid
                 </button>
-                <button
-                  onClick={() => onNavigate('procurement')}
-                  className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold backdrop-blur-xs border border-white/20 flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  <Building2 className="h-4 w-4" /> B2B Sourcing
-                </button>
-              </div>
-            </div>
-
-            {/* Emblem Logo Badge Showcase */}
-            <div className="shrink-0 flex flex-col items-center justify-center p-4 bg-emerald-900/60 rounded-2xl border border-emerald-700/50 shadow-2xl backdrop-blur-md">
-              <img
-                src={agrilinkLogo}
-                alt="AgriLink Official Emblem"
-                className="h-36 w-36 sm:h-44 sm:w-44 rounded-full object-cover border-4 border-emerald-400 shadow-2xl"
-                referrerPolicy="no-referrer"
-              />
-              <span className="mt-3 text-xs font-extrabold uppercase tracking-widest text-emerald-300">
-                Official Seal
-              </span>
-              <span className="text-[10px] text-emerald-200/80 font-medium">
-                Verified Agriculture
-              </span>
-            </div>
+              </>
+            ) : (
+              <button
+                onClick={() => onNavigate(currentUser.role === 'FARMER' ? 'farmer-portal' : currentUser.role === 'BUSINESS_BUYER' ? 'procurement' : 'marketplace')}
+                className="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                <span>Go to My Portal</span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -206,47 +228,115 @@ export const HomePage: React.FC<HomePageProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-zinc-100">
-            {/* Trade Feature */}
-            <div className="p-6 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 flex flex-col justify-between space-y-4">
-              <div className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
-                  <Sprout className="h-4 w-4" /> Trade — Produce Marketplace
-                </span>
-                <h3 className="text-base font-bold text-zinc-900">
-                  Direct B2B Produce Marketplace
-                </h3>
-                <p className="text-xs text-zinc-600 leading-relaxed">
-                  AgriLink’s Produce Marketplace is a B2B e-commerce platform that makes it easy and safe to trade fruit and vegetables with multiple producers across different regions. Our digital solutions solve issues inherent to food trading, including price discovery, quality verification, payments, and batch traceability.
-                </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4 border-t border-zinc-100">
+            {/* Trade Feature: Buy by Digital */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-emerald-50/40 border border-emerald-200/90 flex flex-col justify-between space-y-5 shadow-xs hover:shadow-md transition-shadow">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/80">
+                    <Smartphone className="h-4 w-4 text-emerald-700" /> Trade — Buy Digitally
+                  </span>
+                  <span className="text-[11px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                    Direct E-Commerce
+                  </span>
+                </div>
+
+                <div className="relative rounded-2xl overflow-hidden aspect-16/10 border border-emerald-300/60 shadow-sm group">
+                  <img
+                    src={digitalProduceApp}
+                    alt="Buy fresh farm produce digitally via AgriLink"
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent flex items-end p-4">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300">
+                        Digital Procurement App
+                      </span>
+                      <p className="text-sm font-black text-white">
+                        Inspect Fresh Veggies & Grain with Batch Traceability
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-black text-zinc-900">
+                    Direct B2B Produce Marketplace
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
+                    AgriLink’s Produce Marketplace is a B2B e-commerce platform that makes it easy and safe to trade fruit and vegetables directly with growers. Our digital platform guarantees price discovery, quality verification, mobile payments, and batch traceability.
+                  </p>
+                </div>
               </div>
-              <button
-                onClick={() => onNavigate('marketplace')}
-                className="text-xs font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1 self-start cursor-pointer"
-              >
-                Browse Produce Marketplace <ArrowRight className="h-3.5 w-3.5" />
-              </button>
+
+              <div className="pt-3 border-t border-emerald-100 flex items-center justify-between">
+                <span className="text-xs font-semibold text-zinc-500">
+                  Escrow Protected • Telebirr & CBE
+                </span>
+                <button
+                  onClick={() => onNavigate('marketplace')}
+                  className="text-xs font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-100/80 hover:bg-emerald-200/90 transition-colors cursor-pointer"
+                >
+                  <span>Browse Produce Market</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
 
-            {/* Transact Feature */}
-            <div className="p-6 rounded-2xl bg-blue-50/60 border border-blue-200/80 flex flex-col justify-between space-y-4">
-              <div className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-wider text-blue-800 flex items-center gap-1.5">
-                  <Boxes className="h-4 w-4" /> Transact — Inputs Marketplace
-                </span>
-                <h3 className="text-base font-bold text-zinc-900">
-                  Input Procurement & Data-Backed Financing
-                </h3>
-                <p className="text-xs text-zinc-600 leading-relaxed">
-                  Farmers can procure all their farm supplies directly from manufacturers by using AgriLink's Inputs Marketplace. We also provide input financing solutions based on a farmer’s trading data and regional benchmarking.
-                </p>
+            {/* Transact Feature: Modern Farmlands & Inputs */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-blue-50 via-white to-blue-50/40 border border-blue-200/90 flex flex-col justify-between space-y-5 shadow-xs hover:shadow-md transition-shadow">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-blue-800 flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/80">
+                    <Tractor className="h-4 w-4 text-blue-700" /> Transact — Farmlands & Inputs
+                  </span>
+                  <span className="text-[11px] font-bold text-blue-700 bg-white border border-blue-200 px-2.5 py-0.5 rounded-full">
+                    Mechanization & Seeds
+                  </span>
+                </div>
+
+                <div className="relative rounded-2xl overflow-hidden aspect-16/10 border border-blue-300/60 shadow-sm group">
+                  <img
+                    src={farmTractorSunrise}
+                    alt="Farmland cultivation and tractor mechanization"
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent flex items-end p-4">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-300">
+                        Modern Ethiopian Farmlands
+                      </span>
+                      <p className="text-sm font-black text-white">
+                        Certified Seeds, Tractors & Direct Input Credit
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-black text-zinc-900">
+                    Input Procurement & Farm Mechanization
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
+                    Farmers can procure certified seeds, fertilizers, and tractor tilling services directly from manufacturers. We also provide data-backed input financing and equipment leasing based on verified harvest history.
+                  </p>
+                </div>
               </div>
-              <button
-                onClick={() => onNavigate('inputs')}
-                className="text-xs font-bold text-blue-800 hover:text-blue-950 flex items-center gap-1 self-start cursor-pointer"
-              >
-                Browse Inputs Marketplace <ArrowRight className="h-3.5 w-3.5" />
-              </button>
+
+              <div className="pt-3 border-t border-blue-100 flex items-center justify-between">
+                <span className="text-xs font-semibold text-zinc-500">
+                  Direct from Verified Suppliers
+                </span>
+                <button
+                  onClick={() => onNavigate('inputs')}
+                  className="text-xs font-bold text-blue-800 hover:text-blue-950 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-100/80 hover:bg-blue-200/90 transition-colors cursor-pointer"
+                >
+                  <span>Browse Inputs Market</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -306,6 +396,107 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
+      {/* Verified Farmlands & Agricultural Mechanization Showcase */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-zinc-950 text-white rounded-3xl p-8 sm:p-12 border border-zinc-800 shadow-xl space-y-8 overflow-hidden relative">
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative z-10">
+            <div className="space-y-2">
+              <span className="text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-700/60 px-3 py-1 rounded-full inline-block">
+                Ethiopian Farmland Corridors
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                From Verified Fields to Digital B2B Settlement
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl">
+                Connecting mechanized farms in Arsi, Sidama, and Wonji with Addis Ababa's commercial kitchens, supermarket shelves, and export terminals.
+              </p>
+            </div>
+
+            <button
+              onClick={() => onNavigate('marketplace')}
+              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 self-start md:self-auto shrink-0 shadow-lg shadow-emerald-500/20"
+            >
+              <span>Explore Farm Batches</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* 3-Column Visual Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+            {/* Farm Place 1: Mechanized Farmland */}
+            <div className="rounded-2xl bg-zinc-900/90 border border-zinc-800 overflow-hidden group hover:border-emerald-500/60 transition-all">
+              <div className="relative aspect-16/10 overflow-hidden bg-zinc-800">
+                <img
+                  src={farmTractorIrrigation}
+                  alt="Mechanized Ethiopian farmland with irrigation tractor"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-900/90 text-emerald-200 border border-emerald-500/40">
+                  Mechanized Field
+                </span>
+              </div>
+              <div className="p-4 space-y-1.5">
+                <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+                  <Tractor className="h-4 w-4 text-emerald-400" /> Arsi & Wonji Farmlands
+                </h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Precision boom spraying, drip irrigation channels, and mechanized harvesting across 24,000+ hectares.
+                </p>
+              </div>
+            </div>
+
+            {/* Farm Place 2: Greenhouse Horticulture */}
+            <div className="rounded-2xl bg-zinc-900/90 border border-zinc-800 overflow-hidden group hover:border-emerald-500/60 transition-all">
+              <div className="relative aspect-16/10 overflow-hidden bg-zinc-800">
+                <img
+                  src={ethiopiaGreenhouseFarm}
+                  alt="Modern protected greenhouse horticulture"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-900/90 text-blue-200 border border-blue-500/40">
+                  Greenhouse Hub
+                </span>
+              </div>
+              <div className="p-4 space-y-1.5">
+                <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+                  <Sprout className="h-4 w-4 text-blue-400" /> Protected Horticulture
+                </h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Export-grade bell peppers, cherry tomatoes, and microgreens grown in climate-controlled polytunnels in Bishoftu.
+                </p>
+              </div>
+            </div>
+
+            {/* Farm Place 3: Digital Buying & Mobile App */}
+            <div className="rounded-2xl bg-zinc-900/90 border border-zinc-800 overflow-hidden group hover:border-emerald-500/60 transition-all">
+              <div className="relative aspect-16/10 overflow-hidden bg-zinc-800">
+                <img
+                  src={digitalProduceApp}
+                  alt="Buy fresh vegetables digitally on mobile phone"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-900/90 text-amber-200 border border-amber-500/40">
+                  Buy By Digital
+                </span>
+              </div>
+              <div className="p-4 space-y-1.5">
+                <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+                  <Smartphone className="h-4 w-4 text-amber-400" /> Digital Order & Escrow
+                </h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Inspect lots, verify moisture/grade certifications, and order directly on phone with guaranteed escrow release.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Meet the Founding Team */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto space-y-2 mb-10">
@@ -316,86 +507,60 @@ export const HomePage: React.FC<HomePageProps> = ({
             Meet the Founding Team
           </h2>
           <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed">
-            Our founding team combines managerial experience in Food, E‑commerce, Finance, and Software Development at world-leading companies — including Amazon, Jumia, JP Morgan, and Luno.
+            Our leadership combines extensive domain expertise in Agritech, Digital Marketplaces, Distributed Systems, and Financial Settlement across Ethiopia and East Africa.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Louis de Kock */}
-          <div className="bg-white rounded-3xl border border-zinc-200 p-6 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-all">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Bamlak Sisay */}
+          <div className="bg-white rounded-3xl border border-zinc-200 p-7 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-all">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-700 to-emerald-900 text-white flex items-center justify-center text-lg font-black shadow-md">
-                  LdK
+                  BS
                 </div>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800">
-                  Co-Founder
+                  Co-Founder & Product Lead
                 </span>
               </div>
 
               <div>
-                <h3 className="text-base font-black text-zinc-900">Louis de Kock</h3>
-                <span className="text-[11px] font-semibold text-emerald-700 block">Chartered Accountant & Oxford MBA</span>
+                <h3 className="text-lg font-black text-zinc-900">Bamlak Sisay</h3>
+                <span className="text-[11px] font-semibold text-emerald-700 block">Agro-Tech Entrepreneur & Digital Ecosystem Architect</span>
               </div>
 
               <p className="text-xs text-zinc-600 leading-relaxed">
-                Son of a vegetable farmer, Louis started his career in investment banking before joining Amazon’s e-commerce teams in EU and US. Louis’s e-commerce experience includes launching Amazon Go’s produce division and managing meat & seafood for Amazon Fresh. His stint at Jumia, Africa’s largest online retailer, provided exposure to cross-border e-commerce in Africa.
+                Dedicated agricultural technologist and entrepreneur with deep expertise in digital commerce and value-chain modernizations across Ethiopia. Bamlak drives the product roadmap, merchant escrow frameworks, and partnerships with agricultural unions and commercial buyers across East Africa.
               </p>
             </div>
             <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
-              <span>Ex-Amazon, Jumia, Oxford</span>
+              <span>AgriLink Co-Founding Partner</span>
             </div>
           </div>
 
-          {/* Eugene Roodt */}
-          <div className="bg-white rounded-3xl border border-zinc-200 p-6 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-all">
+          {/* Besufkad Anbes */}
+          <div className="bg-white rounded-3xl border border-zinc-200 p-7 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-all">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-700 to-blue-900 text-white flex items-center justify-center text-lg font-black shadow-md">
-                  ER
+                  BA
                 </div>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-blue-800">
-                  Co-Founder
+                  Co-Founder & Systems Architect
                 </span>
               </div>
 
               <div>
-                <h3 className="text-base font-black text-zinc-900">Eugene Roodt</h3>
-                <span className="text-[11px] font-semibold text-blue-700 block">Chartered Accountant & Corporate Finance</span>
+                <h3 className="text-lg font-black text-zinc-900">Besufkad Anbes</h3>
+                <span className="text-[11px] font-semibold text-blue-700 block">Fintech & Scaled Distributed Systems Engineer</span>
               </div>
 
               <p className="text-xs text-zinc-600 leading-relaxed">
-                Prior to AgriLink, Eugene worked for J.P. Morgan as an experienced Investment Banker and qualified Chartered Accountant working in London, Sydney, and Johannesburg. He focused on clients and transactions in the Consumer, Retail and Technology space. During his corporate finance career he helped corporations on numerous transactions including mergers & acquisitions, IPOs and fundraising.
+                Software engineer and distributed systems specialist focused on financial technologies, offline USSD infrastructure (*6112#), and high-throughput B2B settlement engines. Besufkad leads platform engineering, cold-chain IoT tracking, and bank API integrations.
               </p>
             </div>
             <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
-              <span>Ex-J.P. Morgan (London/Sydney)</span>
-            </div>
-          </div>
-
-          {/* Rick Kleinhans */}
-          <div className="bg-white rounded-3xl border border-zinc-200 p-6 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-all">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-700 to-purple-900 text-white flex items-center justify-center text-lg font-black shadow-md">
-                  RK
-                </div>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-purple-50 text-purple-800">
-                  Co-Founder
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-base font-black text-zinc-900">Rick Kleinhans</h3>
-                <span className="text-[11px] font-semibold text-purple-700 block">Software Developer & Systems Architect</span>
-              </div>
-
-              <p className="text-xs text-zinc-600 leading-relaxed">
-                A software developer by trade, Rick is passionate about building companies and has spent his entire career either as a founder, or an early employee, at various startups. Most recently he helped Luno grow from a 15 person team into a global brand serving more than 5 million customers, in more than 40 countries. Alongside fintech his experience also includes time in travel, e‑commerce, and enterprise SaaS systems.
-              </p>
-            </div>
-            <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
-              <span>Ex-Luno, Global FinTech & SaaS</span>
+              <span>AgriLink Co-Founding Partner</span>
             </div>
           </div>
         </div>

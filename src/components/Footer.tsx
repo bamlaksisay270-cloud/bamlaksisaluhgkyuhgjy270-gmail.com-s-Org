@@ -20,17 +20,28 @@ export const Footer: React.FC<{ onNavigate: (tab: string) => void }> = ({ onNavi
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-12 border-b border-zinc-900">
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => {
+                onNavigate('home');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="flex items-center gap-2.5 text-left group cursor-pointer"
+            >
               <img
                 src={agrilinkLogo}
                 alt="AgriLink Logo"
-                className="h-11 w-11 rounded-full object-cover border-2 border-emerald-500 shadow-md shadow-emerald-950"
+                className="h-11 w-11 rounded-full object-cover border-2 border-emerald-500 shadow-md shadow-emerald-950 group-hover:scale-105 transition-transform"
                 referrerPolicy="no-referrer"
               />
-              <span className="text-xl font-black tracking-tight text-white">
-                AGRI<span className="text-emerald-500">LINK</span>
-              </span>
-            </div>
+              <div>
+                <span className="text-xl font-black tracking-tight text-white group-hover:text-emerald-400 transition-colors">
+                  AGRI<span className="text-emerald-500">LINK</span>
+                </span>
+                <span className="block text-[10px] text-zinc-500 font-semibold tracking-wider uppercase">
+                  Ethiopia & African Agritech
+                </span>
+              </div>
+            </button>
             <p className="text-xs text-zinc-400 leading-relaxed max-w-sm">
               Empowering farmers to trade and transact digitally. AgriLink creates digital solutions and logistical networks that transform the agricultural value chain across Africa.
             </p>

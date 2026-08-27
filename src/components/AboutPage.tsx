@@ -1,5 +1,9 @@
 import React from 'react';
 import agrilinkLogo from '../assets/images/agrilink_logo_1787551924489.jpg';
+import farmTractorSunrise from '../assets/images/farm_tractor_sunrise_1787815703199.jpg';
+import farmTractorIrrigation from '../assets/images/farm_tractor_irrigation_1787815687313.jpg';
+import digitalProduceApp from '../assets/images/digital_produce_app_1787815717840.jpg';
+import ethiopiaGreenhouseFarm from '../assets/images/ethiopia_greenhouse_farm_1787814574646.jpg';
 import {
   Sprout,
   ShieldCheck,
@@ -19,6 +23,8 @@ import {
   Phone,
   Mail,
   Zap,
+  Smartphone,
+  Tractor,
 } from 'lucide-react';
 
 interface AboutPageProps {
@@ -28,30 +34,21 @@ interface AboutPageProps {
 export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
   const founders = [
     {
-      name: 'Louis de Kock',
-      role: 'Co-Founder',
-      initials: 'LdK',
+      name: 'Bamlak Sisay',
+      role: 'Co-Founder & Product Lead',
+      initials: 'BS',
       bgGradient: 'from-emerald-700 to-emerald-900',
-      bio: 'Son of a vegetable farmer, Louis started his career in investment banking before joining Amazon’s e-commerce teams in EU and US. Louis’s e-commerce experience includes launching Amazon Go’s produce division and managing meat & seafood for Amazon Fresh. His stint at Jumia, Africa’s largest online retailer, provided exposure to cross-border e-commerce in Africa.',
-      credentials: 'Chartered Accountant & MBA from University of Oxford',
+      bio: 'Dedicated agricultural technologist and entrepreneur with deep expertise in digital commerce and value-chain modernizations across Ethiopia. Bamlak drives the product roadmap, merchant escrow frameworks, and partnerships with agricultural unions and commercial buyers across East Africa.',
+      credentials: 'Agro-Tech Entrepreneur & Digital Ecosystem Architect',
       linkedin: 'https://linkedin.com',
     },
     {
-      name: 'Eugene Roodt',
-      role: 'Co-Founder',
-      initials: 'ER',
+      name: 'Besufkad Anbes',
+      role: 'Co-Founder & Systems Architect',
+      initials: 'BA',
       bgGradient: 'from-blue-700 to-blue-900',
-      bio: 'Prior to AgriLink, Eugene worked for J.P. Morgan as an experienced Investment Banker and qualified Chartered Accountant working in London, Sydney, and Johannesburg. He focused on clients and transactions in the Consumer, Retail and Technology space. During his corporate finance career he helped corporations on numerous transactions including mergers & acquisitions, IPOs and fundraising.',
-      credentials: 'Chartered Accountant & Corporate Finance Specialist',
-      linkedin: 'https://linkedin.com',
-    },
-    {
-      name: 'Rick Kleinhans',
-      role: 'Co-Founder',
-      initials: 'RK',
-      bgGradient: 'from-purple-700 to-purple-900',
-      bio: 'A software developer by trade, Rick is passionate about building companies and has spent his entire career either as a founder, or an early employee, at various startups. Most recently he helped Luno grow from a 15 person team into a global brand serving more than 5 million customers in more than 40 countries. Alongside fintech, his experience includes time in travel, e‑commerce, and enterprise SaaS systems.',
-      credentials: 'Fintech & Scaled Distributed Systems Architect',
+      bio: 'Software engineer and distributed systems specialist focused on financial technologies, offline USSD infrastructure (*6112#), and high-throughput B2B settlement engines. Besufkad leads platform engineering, cold-chain IoT tracking, and bank API integrations.',
+      credentials: 'Fintech & Scaled Distributed Systems Engineer',
       linkedin: 'https://linkedin.com',
     },
   ];
@@ -172,12 +169,31 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Card 1: Trade */}
-          <div className="p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm flex flex-col justify-between space-y-6 hover:border-emerald-500 transition-colors">
+          {/* Card 1: Trade (Buy By Digital) */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm flex flex-col justify-between space-y-6 hover:border-emerald-500 transition-colors">
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-xs font-bold">
-                <Sprout className="h-4 w-4" /> Trade — Produce Marketplace
+              <div className="flex items-center justify-between">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-xs font-bold">
+                  <Smartphone className="h-4 w-4 text-emerald-700" /> Trade — Buy Produce Digitally
+                </div>
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                  Digital B2B Market
+                </span>
               </div>
+
+              {/* Digital Produce App Image */}
+              <div className="relative rounded-2xl overflow-hidden aspect-16/9 border border-emerald-100 shadow-2xs">
+                <img
+                  src={digitalProduceApp}
+                  alt="Buy by Digital Produce Mobile Platform"
+                  className="w-full h-full object-cover hover:scale-102 transition-transform duration-300"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-zinc-950/80 backdrop-blur-xs text-white text-[11px] font-semibold">
+                  Fresh Produce Mobile Procurement & Escrow
+                </div>
+              </div>
+
               <h3 className="text-xl font-bold text-zinc-900">
                 B2B E-Commerce for Fruit & Vegetables
               </h3>
@@ -207,12 +223,31 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
             </button>
           </div>
 
-          {/* Card 2: Transact */}
-          <div className="p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm flex flex-col justify-between space-y-6 hover:border-blue-500 transition-colors">
+          {/* Card 2: Transact (Farmlands & Inputs) */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm flex flex-col justify-between space-y-6 hover:border-blue-500 transition-colors">
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-50 text-blue-800 text-xs font-bold">
-                <Package className="h-4 w-4" /> Transact — Inputs Marketplace
+              <div className="flex items-center justify-between">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-50 text-blue-800 text-xs font-bold">
+                  <Tractor className="h-4 w-4 text-blue-700" /> Transact — Farmlands & Inputs
+                </div>
+                <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full">
+                  Mechanization & Credit
+                </span>
               </div>
+
+              {/* Farmland Mechanization Image */}
+              <div className="relative rounded-2xl overflow-hidden aspect-16/9 border border-blue-100 shadow-2xs">
+                <img
+                  src={farmTractorSunrise}
+                  alt="Modern Mechanized Farmlands"
+                  className="w-full h-full object-cover hover:scale-102 transition-transform duration-300"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-zinc-950/80 backdrop-blur-xs text-white text-[11px] font-semibold">
+                  Farmland Mechanization, Seeds & Input Credit
+                </div>
+              </div>
+
               <h3 className="text-xl font-bold text-zinc-900">
                 Procure Supplies & Access Input Financing
               </h3>
@@ -254,11 +289,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
             Meet the Founding Team
           </h2>
           <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
-            Our founding team combines managerial experience in Food, E‑commerce, Finance, and Software Development at world-leading companies — including Amazon, Jumia, JP Morgan, and Luno.
+            Our founding team brings together deep domain experience across Agritech, E‑Commerce, Financial Systems, and Scaled Software Engineering to transform Ethiopia's agricultural economy.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {founders.map((founder) => (
             <div
               key={founder.name}

@@ -230,6 +230,24 @@ export interface OrderItem {
   status: string;
 }
 
+export interface Payment {
+  id: number;
+  orderId: number;
+  userId: number;
+  amountEtb: number;
+  currency: string;
+  provider: 'CHAPA' | 'TELEBIRR' | 'CBE_BIRR' | 'AWASH_BANK' | 'BANK_TRANSFER' | 'CASH_ON_DELIVERY' | string;
+  transactionRef: string;
+  status: 'PENDING' | 'PROCESSING' | 'PAID' | 'ESCROW_HELD' | 'RELEASED_TO_FARMER' | 'REFUNDED' | 'FAILED' | string;
+  paymentMethod?: string | null;
+  payerAccountNumber?: string | null;
+  paymentDetails?: any;
+  paidAt?: string | null;
+  createdAt: string;
+  userName?: string;
+  userPhone?: string;
+}
+
 export interface Order {
   id: number;
   orderNumber: string;
@@ -256,8 +274,10 @@ export interface Order {
   notes?: string | null;
   createdAt: string;
   buyerName?: string;
+  buyer?: User;
   items?: OrderItem[];
   delivery?: Delivery;
+  payment?: Payment;
   hub?: Hub;
 }
 
@@ -416,14 +436,49 @@ export interface NotificationItem {
   createdAt: string;
 }
 
-export interface MessageItem {
+export interface AuditLog {
   id: number;
-  conversationId: string;
-  senderId: number;
-  recipientId: number;
-  senderName: string;
-  senderRole: string;
-  content: string;
-  isRead: boolean;
-  createdAt: string;
+  userId?: number | null;
+  userEmail?: string | null;
+  action: string;
+  entityType: string;
+  entityId?: number | null;
+  details?: string | null;
+  previousValue?: string | null;
+  newValue?: string | null;
+  ipAddress?: string | null;
+  timestamp: string;
 }
+
+export interface SupportTicket {
+  id: number;
+  ticketNumber: string;
+  userId: number;
+  category: 'PAYMENT' | 'ORDER_DISPUTE' | 'QUALITY_ISSUE' | 'DRIVER_DELAY' | 'ACCOUNT_VERIFICATION' | 'TECHNICAL' | string;
+  subject: string;
+  description: string;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  assignedAdminId?: number | null;
+  assignedAdminName?: string | null;
+  resolutionNotes?: string | null;
+  userName?: string;
+  userRole?: string;
+  userPhone?: string;
+  userEmail?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlatformSettings {
+  id: number;
+  platformFeePercent: number;
+  escrowHoldHours: number;
+  minOrderAmountEtb: number;
+  currency: string;
+  maintenanceMode: boolean;
+  supportPhone: string;
+  supportEmail: string;
+  taxRatePercent: number;
+}
+

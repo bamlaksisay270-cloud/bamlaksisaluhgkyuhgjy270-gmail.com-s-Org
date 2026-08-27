@@ -10,7 +10,6 @@ import {
   Carrot,
   Apple,
   Wheat,
-  Coffee,
   Flower2,
   Boxes,
   Truck,
@@ -21,6 +20,7 @@ import {
   Briefcase,
   Store,
   Globe,
+  Sprout,
 } from 'lucide-react';
 import { Product, ProductCategory } from '../types/index.ts';
 
@@ -96,8 +96,8 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({
         return <Apple className="h-4 w-4" />;
       case 'Wheat':
         return <Wheat className="h-4 w-4" />;
-      case 'Coffee':
-        return <Coffee className="h-4 w-4" />;
+      case 'Sprout':
+        return <Sprout className="h-4 w-4" />;
       case 'Flower2':
         return <Flower2 className="h-4 w-4" />;
       default:
@@ -240,7 +240,7 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({
             <option value="Addis Ababa">Addis Ababa Logistics Corridor</option>
             <option value="Sidama">Sidama / Hawassa</option>
             <option value="Amhara">Amhara / Bahir Dar</option>
-            <option value="SNNPR">SNNPR / Gedeo / Yirgacheffe</option>
+            <option value="SNNPR">SNNPR / Gamo / Chencha / Welayta</option>
           </select>
 
           {/* Organic Checkbox */}

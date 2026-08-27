@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import farmTractorSunrise from '../assets/images/farm_tractor_sunrise_1787815703199.jpg';
+import farmTractorIrrigation from '../assets/images/farm_tractor_irrigation_1787815687313.jpg';
+import ethiopiaGreenhouseFarm from '../assets/images/ethiopia_greenhouse_farm_1787814574646.jpg';
 import {
   Sprout,
   Plus,
@@ -22,6 +25,7 @@ import {
   Briefcase,
   Store,
   Globe,
+  Tractor,
 } from 'lucide-react';
 import { User, Farm, FarmField, Product, FinanceApplication, TargetBuyerType } from '../types/index.ts';
 
@@ -280,12 +284,12 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
             </div>
           </div>
 
-          {/* Active Field Parcels Spotlight */}
-          <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-2xs">
-            <div className="flex items-center justify-between mb-4">
+          {/* Active Field Parcels Spotlight & Farmland Landscape */}
+          <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-2xs space-y-6">
+            <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-zinc-900">Digital Farm Fields & Live Crop Status</h3>
-                <p className="text-xs text-zinc-500">Real-time health, soil moisture, and expected harvest dates for crop parcels</p>
+                <h3 className="text-base font-bold text-zinc-900">Digital Farm Fields & Mechanized Land Status</h3>
+                <p className="text-xs text-zinc-500">Real-time health, soil moisture, and tractor mechanization telemetry</p>
               </div>
               <button
                 onClick={() => setActiveSubTab('fields')}
@@ -293,6 +297,32 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
               >
                 View all fields →
               </button>
+            </div>
+
+            {/* Visual Farm Place Banner */}
+            <div className="relative rounded-2xl overflow-hidden aspect-21/9 border border-zinc-200">
+              <img
+                src={farmTractorSunrise}
+                alt="Registered Farmland Estate"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/20 to-transparent p-5 flex flex-col justify-end">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/40">
+                      Wonji Sector 4A • Active Cultivation
+                    </span>
+                    <h4 className="text-base sm:text-lg font-black text-white mt-1">
+                      Mechanized Plot Alpha (14.5 Hectares)
+                    </h4>
+                  </div>
+                  <div className="flex items-center gap-2 bg-zinc-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-zinc-700 text-xs text-white">
+                    <Tractor className="h-4 w-4 text-amber-400" />
+                    <span>Next Tilling: <strong>Tomorrow, 07:00 AM</strong></span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -655,9 +685,9 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
                   >
                     <option value="1">Fresh Vegetables</option>
                     <option value="2">Fresh Fruits</option>
-                    <option value="3">Grains & Cereals</option>
-                    <option value="4">Specialty Coffee & Spices</option>
-                    <option value="5">Cut Flowers & Herbs</option>
+                    <option value="3">Grains & Cereals (Teff, Wheat, Maize)</option>
+                    <option value="4">Fresh Tubers & Root Crops (Potatoes, Garlic)</option>
+                    <option value="5">Fresh Culinary Herbs & Greens</option>
                     <option value="6">Pulses & Oilseeds</option>
                   </select>
                 </div>
